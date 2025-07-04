@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { FaPlus, FaEdit, FaTrash, FaBuilding, FaSearch, FaMoneyBillWave } from 'react-icons/fa';
 import apiService from '../services/api';
 import { formatRupiah } from '../utils/formatCurrency';
+import { useAuth } from '../contexts/AuthContext';
 
 const VenueReservations = () => {
+  const { isAdmin } = useAuth();
   const [venueReservations, setVenueReservations] = useState([]);
   const [venues, setVenues] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -226,12 +228,14 @@ const VenueReservations = () => {
                   <FaEdit className="w-4 h-4" />
                 </button>
                 
-                <button
-                  onClick={() => handleDelete(reservation.id)}
-                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                >
-                  <FaTrash className="w-4 h-4" />
-                </button>
+                {isAdmin && (
+                  <button
+                    onClick={() => handleDelete(reservation.id)}
+                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  >
+                    <FaTrash className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             </div>
           </div>

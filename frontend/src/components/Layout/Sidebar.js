@@ -5,40 +5,52 @@ import {
   FaBed, 
   FaBuilding, 
   FaCalendarCheck, 
-  FaCalendarAlt 
+  FaCalendarAlt
 } from 'react-icons/fa';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Sidebar = ({ isOpen }) => {
   const location = useLocation();
+  const { canAccess } = useAuth();
 
   const menuItems = [
     {
       path: '/',
       icon: FaTachometerAlt,
       label: 'Dashboard',
-      exact: true
+      exact: true,
+      roles: ['admin', 'resepsionis']
     },
     {
       path: '/rooms',
       icon: FaBed,
-      label: 'Rooms'
+      label: 'Kamar',
+      roles: ['admin'] // Hanya admin
     },
     {
       path: '/venues',
       icon: FaBuilding,
-      label: 'Venues'
+      label: 'Venue',
+      roles: ['admin'] // Hanya admin
     },
     {
       path: '/reservations',
       icon: FaCalendarCheck,
-      label: 'Room Reservations'
+      label: 'Reservasi Kamar',
+      roles: ['admin', 'resepsionis'] // Kedua role
     },
     {
       path: '/venue-reservations',
       icon: FaCalendarAlt,
-      label: 'Venue Reservations'
+      label: 'Reservasi Venue',
+      roles: ['admin', 'resepsionis'] // Kedua role
     }
   ];
+
+  // Filter menu berdasarkan role
+  const allowedMenuItems = menuItems.filter(item => 
+    canAccess(item.roles)
+  );
 
   const isActive = (item) => {
     if (item.exact) {
@@ -54,9 +66,10 @@ const Sidebar = ({ isOpen }) => {
       ${isOpen ? 'translate-x-0' : '-translate-x-full'}
       md:translate-x-0
     `}>
+      {/* Navigation */}
       <nav className="p-4">
         <ul className="space-y-2">
-          {menuItems.map((item) => {
+          {allowedMenuItems.map((item) => {
             const Icon = item.icon;
             return (
               <li key={item.path}>

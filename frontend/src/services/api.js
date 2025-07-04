@@ -3,9 +3,12 @@ const API_BASE = 'http://localhost:8000/api';
 class ApiService {
   async request(endpoint, options = {}) {
     const url = `${API_BASE}${endpoint}`;
+    const token = localStorage.getItem('auth-token');
+    
     const config = {
       headers: {
         'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` }),
         ...options.headers,
       },
       ...options,
@@ -24,6 +27,31 @@ class ApiService {
       console.error('API Error:', error);
       throw error;
     }
+  }
+
+  // Auth API
+  async login(email, password) {
+    return this.request('/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
+  }
+
+  async logout() {
+    return this.request('/logout', {
+      method: 'POST',
+    });
+  }
+
+  async me() {
+    return this.request('/me');
+  }
+
+  async register(data) {
+    return this.request('/register', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   }
 
   // Room API
