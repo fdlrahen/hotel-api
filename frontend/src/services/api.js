@@ -163,6 +163,11 @@ class ApiService {
       body: JSON.stringify({ status }),
     });
   }
+
+  // Reports API
+  async getReports() {
+    return this.request('/reports');
+  }
 }
 
 export default new ApiService(); 

@@ -71,24 +71,6 @@ const Sidebar = ({ isOpen }) => {
             );
           })}
         </ul>
-
-        <div className="mt-8 pt-8 border-t border-gray-200">
-          <div className="px-4">
-            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-              Quick Stats
-            </h3>
-            <div className="space-y-3">
-              <div className="text-sm">
-                <span className="text-gray-600">Active Rooms:</span>
-                <span className="font-medium text-gray-900 ml-2">--</span>
-              </div>
-              <div className="text-sm">
-                <span className="text-gray-600">Today's Reservations:</span>
-                <span className="font-medium text-gray-900 ml-2">--</span>
-              </div>
-            </div>
-          </div>
-        </div>
       </nav>
     </aside>
   );

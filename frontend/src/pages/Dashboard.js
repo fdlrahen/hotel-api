@@ -5,20 +5,16 @@ import {
   FaCalendarCheck, 
   FaMoneyBillWave,
   FaUsers,
-  FaChartLine
+  FaChartLine,
+  FaClock,
+  FaCalendarWeek,
+  FaCalendarAlt
 } from 'react-icons/fa';
 import apiService from '../services/api';
 import { formatRupiah } from '../utils/formatCurrency';
 
 const Dashboard = () => {
-  const [stats, setStats] = useState({
-    totalRooms: 0,
-    totalVenues: 0,
-    totalReservations: 0,
-    totalVenueReservations: 0,
-    paidReservations: 0,
-    unpaidReservations: 0
-  });
+  const [reportData, setReportData] = useState(null);
   const [recentReservations, setRecentReservations] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -30,31 +26,18 @@ const Dashboard = () => {
     try {
       setLoading(true);
       
-      // Fetch all data
-      const [roomsRes, venuesRes, reservationsRes, venueReservationsRes] = await Promise.all([
-        apiService.getRooms(),
-        apiService.getVenues(),
+      // Fetch reports data from new API
+      const reportsResponse = await apiService.getReports();
+      setReportData(reportsResponse.data);
+
+      // Fetch recent reservations (tetap menggunakan cara lama untuk recent reservations)
+      const [reservationsRes, venueReservationsRes] = await Promise.all([
         apiService.getReservations(),
         apiService.getVenueReservations()
       ]);
 
-      // Calculate stats
       const reservations = reservationsRes.data || [];
       const venueReservations = venueReservationsRes.data || [];
-      
-      const paidCount = reservations.filter(r => r.status === 'paid').length + 
-                        venueReservations.filter(r => r.status === 'paid').length;
-      const unpaidCount = reservations.filter(r => r.status === 'unpaid').length + 
-                          venueReservations.filter(r => r.status === 'unpaid').length;
-
-      setStats({
-        totalRooms: roomsRes.data?.length || 0,
-        totalVenues: venuesRes.data?.length || 0,
-        totalReservations: reservations.length,
-        totalVenueReservations: venueReservations.length,
-        paidReservations: paidCount,
-        unpaidReservations: unpaidCount
-      });
 
       // Get recent reservations (combine both types)
       const allReservations = [
@@ -78,8 +61,37 @@ const Dashboard = () => {
           <p className="text-2xl font-bold text-gray-900">{value}</p>
           {subtitle && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
         </div>
-        <div className={`p-3 rounded-lg ${color}`}>
-          <Icon className="w-6 h-6 text-white" />
+        {/* Conditionally render the icon container only if 'Icon' is provided */}
+        {Icon && (
+          <div className={`p-3 rounded-lg ${color}`}>
+            <Icon className="w-6 h-6 text-white" />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  const PeriodStatsCard = ({ title, icon: Icon, data, color }) => (
+    <div className="card">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="font-semibold text-gray-900">{title}</h3>
+        <div className={`p-2 rounded-lg ${color}`}>
+          <Icon className="w-5 h-5 text-white" />
+        </div>
+      </div>
+      
+      <div className="space-y-3">
+        <div className="flex justify-between items-center">
+          <span className="text-sm text-gray-600">Reservasi Kamar:</span>
+          <span className="font-medium">{data.room_reservations}</span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-sm text-gray-600">Reservasi Venue:</span>
+          <span className="font-medium">{data.venue_reservations}</span>
+        </div>
+        <div className="flex justify-between items-center pt-2 border-t">
+          <span className="text-sm font-medium text-gray-600">Pendapatan:</span>
+          <span className="font-bold text-green-600">{formatRupiah(data.revenue)}</span>
         </div>
       </div>
     </div>
@@ -93,6 +105,14 @@ const Dashboard = () => {
     );
   }
 
+  if (!reportData) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-red-500">Gagal memuat data laporan</div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -101,53 +121,49 @@ const Dashboard = () => {
         <p className="text-gray-600">Selamat datang di Sistem Manajemen Hotel</p>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {/* Overview Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <StatCard
           icon={FaBed}
           title="Total Kamar"
-          value={stats.totalRooms}
+          value={reportData.totals.total_rooms}
           color="bg-blue-500"
           subtitle="Kamar tersedia"
         />
         <StatCard
           icon={FaBuilding}
           title="Total Venue"
-          value={stats.totalVenues}
+          value={reportData.totals.total_venues}
           color="bg-purple-500"
           subtitle="Ruang acara"
         />
         <StatCard
-          icon={FaCalendarCheck}
-          title="Reservasi Kamar"
-          value={stats.totalReservations}
-          color="bg-green-500"
-          subtitle="Booking aktif"
-        />
-        <StatCard
-          icon={FaUsers}
-          title="Reservasi Venue"
-          value={stats.totalVenueReservations}
+          title="Total Pendapatan"
+          value={formatRupiah(reportData.totals.total_revenue)}
           color="bg-orange-500"
-          subtitle="Booking acara"
+          subtitle="Pembayaran lunas"
         />
       </div>
 
-      {/* Payment Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <StatCard
-          icon={FaMoneyBillWave}
-          title="Reservasi Lunas"
-          value={stats.paidReservations}
-          color="bg-green-600"
-          subtitle="Pembayaran selesai"
+      {/* Period Statistics */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <PeriodStatsCard
+          title="Hari Ini"
+          icon={FaClock}
+          data={reportData.today}
+          color="bg-blue-600"
         />
-        <StatCard
-          icon={FaChartLine}
-          title="Reservasi Belum Lunas"
-          value={stats.unpaidReservations}
-          color="bg-red-500"
-          subtitle="Menunggu pembayaran"
+        <PeriodStatsCard
+          title="Bulan Ini"
+          icon={FaCalendarWeek}
+          data={reportData.this_month}
+          color="bg-green-600"
+        />
+        <PeriodStatsCard
+          title="Tahun Ini"
+          icon={FaCalendarAlt}
+          data={reportData.this_year}
+          color="bg-purple-600"
         />
       </div>
 
@@ -166,7 +182,7 @@ const Dashboard = () => {
                     reservation.type === 'room' ? 'bg-blue-100' : 'bg-purple-100'
                   }`}>
                     {reservation.type === 'room' ? 
-                      <FaBed className={`w-4 h-4 ${reservation.type === 'room' ? 'text-blue-600' : 'text-purple-600'}`} /> :
+                      <FaBed className="w-4 h-4 text-blue-600" /> :
                       <FaBuilding className="w-4 h-4 text-purple-600" />
                     }
                   </div>
