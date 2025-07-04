@@ -4,6 +4,7 @@ use App\Http\Controllers\RoomController;
 use App\Http\Controllers\VenueController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\VenueReservationController;
+use App\Http\Controllers\ReportController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -26,3 +27,6 @@ Route::patch('reservations/{reservation}/payment-status', [ReservationController
 Route::apiResource('venue-reservations', VenueReservationController::class);
 Route::get('venues/{venue}/availability', [VenueReservationController::class, 'checkAvailability']);
 Route::patch('venue-reservations/{venue_reservation}/payment-status', [VenueReservationController::class, 'updatePaymentStatus']);
+
+// Route untuk Laporan Summary
+Route::get('reports', [ReportController::class, 'summaryReport']);
