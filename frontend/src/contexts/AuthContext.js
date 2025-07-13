@@ -54,7 +54,25 @@ export const AuthProvider = ({ children }) => {
       };
     }
   };
+  const register = async (name, email, password) => {
+    try {
+      const response = await apiService.register({
+        name,
+        email,
+        password,
+        password_confirmation: password,
+        role: 'user' // Set default role "user"
+      });
 
+      return { success: true, message: 'Registrasi berhasil!' };
+    } catch (error) {
+      console.error('Register failed:', error);
+      return {
+        success: false,
+        error: error.message || 'Registrasi gagal',
+      };
+    }
+  };
   const logout = async () => {
     try {
       if (token) {
@@ -82,6 +100,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     token,
     login,
+    register,
     logout,
     hasRole,
     canAccess,

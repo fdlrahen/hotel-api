@@ -1,0 +1,32 @@
+/* App.css or index.css */
+
+.footer {
+    background-color: #333; /* Dark background */
+    color: #fff; /* White text */
+    padding: 40px 0; /* Padding top and bottom */
+    font-size: 0.9rem;
+}
+
+.footer p {
+    margin-bottom: 0.5rem;
+}
+
+.footer-social-icons a {
+    color: #fff;
+    font-size: 1.5rem; /* Larger icons */
+    margin: 0 10px;
+    transition: color 0.3s ease;
+    text-decoration: none; /* Remove underline */
+}
+
+.footer-social-icons a:hover {
+    color: #007bff; /* Bootstrap primary blue on hover */
+}
+
+.footer-copyright {
+    border-top: 1px solid #555;
+    padding-top: 20px;
+    margin-top: 30px;
+    font-size: 0.8rem;
+    color: #aaa;
+}

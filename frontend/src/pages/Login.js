@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { FaUser, FaLock, FaEye, FaEyeSlash, FaHotel } from 'react-icons/fa';
-
+import { useNavigate } from 'react-router-dom'; 
 const Login = () => {
   const { login } = useAuth();
   const [formData, setFormData] = useState({
@@ -11,7 +11,8 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
+  const navigate = useNavigate();
+  
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -28,8 +29,10 @@ const Login = () => {
 
     const result = await login(formData.email, formData.password);
     
-    if (!result.success) {
+      if (!result.success) {
       setError(result.error);
+    } else {
+      navigate('/dashboard'); // ✅ Redirect setelah login berhasil
     }
     
     setLoading(false);

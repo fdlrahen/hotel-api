@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './output.css';
+import { Navigate } from 'react-router-dom';
 
 // Context
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -8,6 +9,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 // Components
 import Layout from './components/Layout/Layout';
 import Login from './pages/Login';
+import Register from './pages/Register'; // Tambahkan ini
 
 // Pages
 import Dashboard from './pages/Dashboard';
@@ -15,6 +17,10 @@ import Rooms from './pages/Rooms';
 import Venues from './pages/Venues';
 import Reservations from './pages/Reservations';
 import VenueReservations from './pages/VenueReservations';
+
+//Navigasi
+import HomeDashboard from './Navigasi/HomeDashboard'
+import LayoutUmum from './Navigasi/component/Layout';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
@@ -28,9 +34,7 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
     );
   }
 
-  if (!isAuthenticated) {
-    return <Login />;
-  }
+  
 
   if (allowedRoles.length > 0 && !canAccess(allowedRoles)) {
     return (
@@ -58,44 +62,63 @@ const AppContent = () => {
     );
   }
 
-  if (!isAuthenticated) {
-    return <Login />;
-  }
-
   return (
-    <Layout>
-      <Routes>
-        <Route path="/" element={
-          <ProtectedRoute allowedRoles={['admin', 'resepsionis']}>
+    <Routes>
+     
+      {/* Halaman publik */}
+       <Route path="/" element={<LayoutUmum />}>
+        <Route index element={<HomeDashboard />} />        
+      </Route>
+      
+      <Route path="/login" element={
+        !isAuthenticated ? <Login /> : <Navigate to="/dashboard" />
+      } />
+
+      <Route path="/register" element={
+        !isAuthenticated ? <Register /> : <Navigate to="/dashboard" />
+      } />
+
+      {/* Halaman yang membutuhkan autentikasi */}
+      <Route path="/dashboard" element={
+        <ProtectedRoute allowedRoles={['admin', 'resepsionis']}>
+          <Layout>
             <Dashboard />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/rooms" element={
-          <ProtectedRoute allowedRoles={['admin']}>
+          </Layout>
+        </ProtectedRoute>
+      } />
+
+      <Route path="/rooms" element={
+        <ProtectedRoute allowedRoles={['admin']}>
+          <Layout>
             <Rooms />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/venues" element={
-          <ProtectedRoute allowedRoles={['admin']}>
+          </Layout>
+        </ProtectedRoute>
+      } />
+
+      <Route path="/venues" element={
+        <ProtectedRoute allowedRoles={['admin']}>
+          <Layout>
             <Venues />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/reservations" element={
-          <ProtectedRoute allowedRoles={['admin', 'resepsionis']}>
+          </Layout>
+        </ProtectedRoute>
+      } />
+
+      <Route path="/reservations" element={
+        <ProtectedRoute allowedRoles={['admin', 'resepsionis']}>
+          <Layout>
             <Reservations />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/venue-reservations" element={
-          <ProtectedRoute allowedRoles={['admin', 'resepsionis']}>
+          </Layout>
+        </ProtectedRoute>
+      } />
+
+      <Route path="/venue-reservations" element={
+        <ProtectedRoute allowedRoles={['admin', 'resepsionis']}>
+          <Layout>
             <VenueReservations />
-          </ProtectedRoute>
-        } />
-      </Routes>
-    </Layout>
+          </Layout>
+        </ProtectedRoute>
+      } />
+    </Routes>
   );
 };
 
